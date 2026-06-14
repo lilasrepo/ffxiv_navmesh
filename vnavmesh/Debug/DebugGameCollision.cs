@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using ImGuiNET;
 using Dalamud.Hooking;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -614,7 +614,7 @@ public unsafe class DebugGameCollision : IDisposable
 			Vector3 trans;
 			coll->GetTranslation(&trans);
 
-			_dd.DrawWorldLine(Service.ObjectTable.LocalPlayer?.Position ?? default, trans, 0xFFFF00FF);
+			_dd.DrawWorldLine(Service.ClientState.LocalPlayer?.Position ?? default, trans, 0xFFFF00FF);
 		}
 	}
 
@@ -709,7 +709,7 @@ public unsafe class DebugGameCollision : IDisposable
 	private void VisualizeVertex(Vector3 worldPos, uint color)
 	{
 		_dd.DrawWorldSphere(worldPos, 0.1f, color);
-		if (Service.ObjectTable.LocalPlayer is { } p)
+		if (Service.ClientState.LocalPlayer is { } p)
 			_dd.DrawWorldLine(p.Position, worldPos, color);
 	}
 

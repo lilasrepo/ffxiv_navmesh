@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using ImGuiNET;
 using Dalamud.Interface.Utility.Raii;
 using DotRecast.Core;
 using DotRecast.Core.Numerics;
@@ -233,13 +233,13 @@ class DebugNavmeshCustom : IDisposable
 		ImGui.InputFloat("Z", ref _dest.Z);
 		if (ImGui.Button("Pathfind"))
 		{
-			var player = Service.ObjectTable.LocalPlayer;
+			var player = Service.ClientState.LocalPlayer;
 			var playerPos = player?.Position ?? default;
 			_navmesh.Query!.PathfindMesh(playerPos, _dest, true, true, 0, new());
 		}
 
 		var navmesh = _navmesh.Navmesh!;
-		navmesh.CalcTileLoc((Service.ObjectTable.LocalPlayer?.Position ?? default).SystemToRecast(), out var playerTileX, out var playerTileZ);
+		navmesh.CalcTileLoc((Service.ClientState.LocalPlayer?.Position ?? default).SystemToRecast(), out var playerTileX, out var playerTileZ);
 		_tree.LeafNode($"Player tile: {playerTileX}x{playerTileZ}");
 
 		_drawExtracted ??= new(_navmesh.Scene!, _navmesh.Extractor!, _tree, _dd, _coll, _configDirectory);

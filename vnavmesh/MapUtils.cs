@@ -14,10 +14,8 @@ public static class MapUtils
 
     private unsafe static Vector2? GetFlagPosition()
     {
-        var map = FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentMap.Instance();
-        if (map == null || map->FlagMarkerCount == 0)
-            return null;
-        var marker = map->FlagMapMarkers[0];
-        return new(marker.XFloat, marker.YFloat);
+        // porting-note: AgentMap.FlagMarkerCount / FlagMapMarkers are game-7.5-only fields.
+        // FlagToPoint feature degrades to "no flag set"; navmesh follow-flag command no-ops on TC 7.1.
+        return null;
     }
 }

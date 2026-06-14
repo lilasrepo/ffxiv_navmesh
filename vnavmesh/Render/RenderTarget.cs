@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using ImGuiNET;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -19,7 +19,8 @@ public class RenderTarget : IDisposable
     private DepthStencilView _depthDSV;
     private DepthStencilState _dss;
 
-    public ImTextureID ImguiHandle => new(_rtSRV.NativePointer);
+    // porting-note: API15 wraps texture IDs in `ImTextureID`; API12 ImGui.NET still uses raw IntPtr.
+    public IntPtr ImguiHandle => _rtSRV.NativePointer;
 
     public RenderTarget(RenderContext ctx, int width, int height, bool inverseZ = true)
     {

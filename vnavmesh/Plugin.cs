@@ -41,7 +41,9 @@ public sealed class Plugin : IDalamudPlugin
         _followPath = new(dalamud, _navmeshManager);
         _asyncMove = new(_navmeshManager, _followPath);
         _dtrProvider = new(_navmeshManager, _asyncMove, _followPath);
-        _wndMain = new(_navmeshManager, _followPath, _asyncMove, _dtrProvider, dalamud.ConfigDirectory.FullName) { IsOpen = dalamud.IsDev };
+        // porting-note: upstream sets IsOpen = dalamud.IsDev which auto-opens the main window
+        // every load when deployed to DevPlugins. TC user prefers manual /vnav toggle.
+        _wndMain = new(_navmeshManager, _followPath, _asyncMove, _dtrProvider, dalamud.ConfigDirectory.FullName) { IsOpen = false };
         _ipcProvider = new(_navmeshManager, _followPath, _asyncMove, _wndMain, _dtrProvider);
 
         WindowSystem.AddWindow(_wndMain);
@@ -196,7 +198,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private void MoveToCommand(string[] args, bool relativeToPlayer, bool fly)
     {
-        var originActor = relativeToPlayer ? Service.ObjectTable.LocalPlayer : null;
+        var originActor = relativeToPlayer ? Service.ClientState.LocalPlayer : null;
         var origin = originActor?.Position ?? new();
         var offset = new Vector3(
             float.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture),

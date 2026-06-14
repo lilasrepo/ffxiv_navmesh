@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using ImGuiNET;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine.Group;
@@ -829,7 +829,7 @@ public unsafe class DebugLayout : IDisposable
 					if (inst.Instance != null)
 					{
 						var trans = inst.Instance->GetTranslationImpl();
-						_dd.DrawWorldLine(Service.ObjectTable.LocalPlayer?.Position ?? default, *trans, 0xFFFF00FF);
+						_dd.DrawWorldLine(Service.ClientState.LocalPlayer?.Position ?? default, *trans, 0xFFFF00FF);
 					}
 				}
 				else

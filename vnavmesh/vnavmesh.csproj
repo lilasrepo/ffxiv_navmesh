@@ -1,19 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Dalamud.NET.Sdk/15.0.0">
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Platforms>x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <LangVersion>preview</LangVersion>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
   <PropertyGroup>
     <Version>1.2.3.5</Version>
   </PropertyGroup>
+  <PropertyGroup>
+    <DalamudLibPath>$(MSBuildThisFileDirectory)..\..\..\TC_ok\_dalamud_api12\</DalamudLibPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
     <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
-    <Reference Include="Dalamud.Common" Private="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DalamudPackager" Version="2.1.13" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Dalamud">
+      <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Dalamud.Common">
+      <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ImGui.NET">
+      <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Lumina">
+      <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Lumina.Excel">
+      <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="InteropGenerator.Runtime">
+      <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DotRecast\src\DotRecast.Core\DotRecast.Core.csproj" />
-    <ProjectReference Include="..\DotRecast\src\DotRecast.Detour\DotRecast.Detour.csproj" />
-    <ProjectReference Include="..\DotRecast\src\DotRecast.Detour.Extras\DotRecast.Detour.Extras.csproj" />
-    <ProjectReference Include="..\DotRecast\src\DotRecast.Recast\DotRecast.Recast.csproj" />
-  </ItemGroup>
+
 </Project>

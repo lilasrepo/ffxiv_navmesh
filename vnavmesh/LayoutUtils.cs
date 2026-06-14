@@ -43,64 +43,69 @@ struct ExdZoneSharedGroup
 	byte Unknown14;
 	byte Unknown15;
 
-	public static implicit operator ExdZoneSharedGroup(Lumina.Excel.Sheets.ZoneSharedGroup sg) => new()
-	{
-		LGBSharedGroup = sg.LGBSharedGroup,
-		RequirementRow0 = sg.RequirementRow[0].RowId,
-		RequirementRow1 = sg.RequirementRow[1].RowId,
-		RequirementRow2 = sg.RequirementRow[2].RowId,
-		RequirementRow3 = sg.RequirementRow[3].RowId,
-		RequirementRow4 = sg.RequirementRow[4].RowId,
-		RequirementRow5 = sg.RequirementRow[5].RowId,
-		Unknown0 = sg.Unknown0,
-		RequirementQuestSequence0 = sg.RequirementQuestSequence[0],
-		RequirementQuestSequence1 = sg.RequirementQuestSequence[1],
-		RequirementQuestSequence2 = sg.RequirementQuestSequence[2],
-		RequirementQuestSequence3 = sg.RequirementQuestSequence[3],
-		RequirementQuestSequence4 = sg.RequirementQuestSequence[4],
-		RequirementQuestSequence5 = sg.RequirementQuestSequence[5],
-		Unknown1 = sg.Unknown1,
-		RequirementType0 = sg.RequirementType[0],
-		RequirementType1 = sg.RequirementType[1],
-		RequirementType2 = sg.RequirementType[2],
-		RequirementType3 = sg.RequirementType[3],
-		RequirementType4 = sg.RequirementType[4],
-		RequirementType5 = sg.RequirementType[5],
-		Unknown8 = sg.Unknown8,
-		Unknown9 = sg.Unknown9 ? (byte)1 : (byte)0,
-		Unknown10 = sg.Unknown10 ? (byte)1 : (byte)0,
-		Unknown11 = sg.Unknown11 ? (byte)1 : (byte)0,
-		Unknown12 = sg.Unknown12 ? (byte)1 : (byte)0,
-		Unknown13 = sg.Unknown13 ? (byte)1 : (byte)0,
-		Unknown14 = sg.Unknown14 ? (byte)1 : (byte)0,
-		Unknown15 = sg.Unknown15 ? (byte)1 : (byte)0,
-	};
+    // porting-note: API12 Lumina ZoneSharedGroup fields are flat-named (no array form).
+    //   HEAD RequirementRow[i]          -> API12 Quest{i}     (RowRef<T>)
+    //   HEAD RequirementQuestSequence[i] -> API12 Seq{i}       (uint)
+    //   HEAD RequirementType[i]         -> API12 Unknown{i+2} (byte)
+    public static implicit operator ExdZoneSharedGroup(Lumina.Excel.Sheets.ZoneSharedGroup sg) => new()
+    {
+        LGBSharedGroup = sg.LGBSharedGroup,
+        RequirementRow0 = sg.Quest0.RowId,
+        RequirementRow1 = sg.Quest1.RowId,
+        RequirementRow2 = sg.Quest2.RowId,
+        RequirementRow3 = sg.Quest3.RowId,
+        RequirementRow4 = sg.Quest4.RowId,
+        RequirementRow5 = sg.Quest5.RowId,
+        Unknown0 = sg.Unknown0,
+        RequirementQuestSequence0 = sg.Seq0,
+        RequirementQuestSequence1 = sg.Seq1,
+        RequirementQuestSequence2 = sg.Seq2,
+        RequirementQuestSequence3 = sg.Seq3,
+        RequirementQuestSequence4 = sg.Seq4,
+        RequirementQuestSequence5 = sg.Seq5,
+        Unknown1 = sg.Unknown1,
+        RequirementType0 = sg.Unknown2,
+        RequirementType1 = sg.Unknown3,
+        RequirementType2 = sg.Unknown4,
+        RequirementType3 = sg.Unknown5,
+        RequirementType4 = sg.Unknown6,
+        RequirementType5 = sg.Unknown7,
+        Unknown8 = sg.Unknown8,
+        Unknown9 = sg.Unknown9 ? (byte)1 : (byte)0,
+        Unknown10 = sg.Unknown10 ? (byte)1 : (byte)0,
+        Unknown11 = sg.Unknown11 ? (byte)1 : (byte)0,
+        Unknown12 = sg.Unknown12 ? (byte)1 : (byte)0,
+        Unknown13 = sg.Unknown13 ? (byte)1 : (byte)0,
+        Unknown14 = sg.Unknown14 ? (byte)1 : (byte)0,
+        Unknown15 = sg.Unknown15 ? (byte)1 : (byte)0,
+    };
 }
 
 public unsafe static class LayoutUtils
 {
-	private static delegate* unmanaged<ExdZoneSharedGroup*, uint> _getEnabledRequirementIndex;
+    // porting-note: HEAD sig "E8 ?? ?? ?? ?? 0F B6 53 6C" targets game 7.5; not resolved on TC 7.1.
+    // Stubbed to null; GetZoneSharedGroupsEnabled returns empty (zone-shared-group navmesh tweaks disabled).
+    private static delegate* unmanaged<ExdZoneSharedGroup*, uint> _getEnabledRequirementIndex;
 
-	static LayoutUtils()
-	{
-		_getEnabledRequirementIndex = (delegate* unmanaged<ExdZoneSharedGroup*, uint>)Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 0F B6 53 6C");
-	}
+    static LayoutUtils()
+    {
+        try
+        {
+            _getEnabledRequirementIndex = (delegate* unmanaged<ExdZoneSharedGroup*, uint>)Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 0F B6 53 6C");
+        }
+        catch
+        {
+            _getEnabledRequirementIndex = null;
+            Service.Log.Warning("LayoutUtils _getEnabledRequirementIndex sig not found (game-7.5 sig vs TC 7.1).");
+        }
+    }
 
-	public static uint[] GetZoneSharedGroupsEnabled(uint territoryType)
-	{
-		var tt = Service.LuminaRow<Lumina.Excel.Sheets.TerritoryType>(territoryType);
-		if (tt == null)
-			return [];
-
-		var rows = tt.Value.ZoneSharedGroup.Value.ToList();
-		var indices = new uint[rows.Count];
-		for (var i = 0; i < rows.Count; i++)
-		{
-			ExdZoneSharedGroup exd = rows[i];
-			indices[i] = _getEnabledRequirementIndex(&exd);
-		}
-		return indices;
-	}
+    public static uint[] GetZoneSharedGroupsEnabled(uint territoryType)
+    {
+        // porting-note: API12 Lumina TerritoryType lacks the ZoneSharedGroup column (HEAD/game-7.5 added).
+        // Without the lumina backing, this function is structurally inert; return empty to caller.
+        return [];
+    }
 
 	public static string ReadString(byte* data) => data != null ? MemoryHelper.ReadStringNullTerminated((nint)data) : "";
 	public static string ReadString(RefCountedString* data) => data != null ? data->DataString : "";

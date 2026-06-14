@@ -40,7 +40,9 @@ public unsafe class OverrideCamera : IDisposable
     public Angle SpeedV = 360.Degrees(); // per second
 
     private delegate void RMICameraDelegate(CameraEx* self, int inputMode, float speedH, float speedV);
-    [Signature("48 8B C4 53 48 81 EC ?? ?? ?? ?? 44 0F 29 50 ??")]
+    // porting-note: HEAD sig "48 8B C4 53 48 81 EC ?? ?? ?? ?? 44 0F 29 50 ??" targets game 7.5;
+    // TC client is game 7.1 — using TC_porting walk-back sig (verified against game 7.1 binary, matches AutoDuty fix).
+    [Signature("40 53 48 83 EC 70 44 0F 29 44 24 ?? 48 8B D9")]
     private Hook<RMICameraDelegate> _rmiCameraHook = null!;
 
     public OverrideCamera()

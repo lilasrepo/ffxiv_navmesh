@@ -1,4 +1,4 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using ImGuiNET;
 using Navmesh.Movement;
 using Navmesh.NavVolume;
 using System;
@@ -62,7 +62,7 @@ class DebugNavmeshManager : IDisposable
 		if (_manager.Navmesh == null || _manager.Query == null)
 			return;
 
-		var player = Service.ObjectTable.LocalPlayer;
+		var player = Service.ClientState.LocalPlayer;
 		var playerPos = player?.Position ?? default;
 		ImGui.TextUnformatted($"Player pos: {playerPos}");
 		if (ImGui.Button("Set target to current pos"))

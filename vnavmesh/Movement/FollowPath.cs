@@ -60,7 +60,7 @@ public class FollowPath : IDisposable
 
 	public void Update(IFramework fwk)
 	{
-		var player = Service.ObjectTable.LocalPlayer;
+		var player = Service.ClientState.LocalPlayer;
 		if (player == null)
 			return;
 
