@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.2.3.5</Version>
+    <Version>1.2.3.7</Version>
   </PropertyGroup>
   <PropertyGroup>
     <DalamudLibPath>$(MSBuildThisFileDirectory)..\..\..\TC_ok\_dalamud_api12\</DalamudLibPath>
@@ -20,6 +20,13 @@
     <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
     <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotRecast\src\DotRecast.Core\DotRecast.Core.csproj" />
+    <ProjectReference Include="..\DotRecast\src\DotRecast.Detour\DotRecast.Detour.csproj" />
+    <ProjectReference Include="..\DotRecast\src\DotRecast.Detour.Extras\DotRecast.Detour.Extras.csproj" />
+    <ProjectReference Include="..\DotRecast\src\DotRecast.Recast\DotRecast.Recast.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.13" />

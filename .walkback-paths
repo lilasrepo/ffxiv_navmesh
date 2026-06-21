@@ -1,0 +1,7 @@
+# Path-level walk-back pins for ffxiv_navmesh — see plugin_update SKILL.md.
+# Pinned 2026-06-19: the 3-way merge strips the <ProjectReference> to DotRecast.Core out of
+# DotRecast.Recast.csproj (leaves an empty <ItemGroup>), so DotRecast.Recast can't resolve RcContext/
+# RcVec3f and the whole DotRecast chain fails (CS0246) — vnavmesh then can't build. This had silently
+# broken the committed baseline since 828df750 (2026-06-13); the shipped dll came from stale obj. Pin
+# the csproj so its DotRecast.Core ProjectReference survives. See FORWARD_PORT_REFERENCE.md navmesh entry.
+DotRecast/src/DotRecast.Recast/DotRecast.Recast.csproj
