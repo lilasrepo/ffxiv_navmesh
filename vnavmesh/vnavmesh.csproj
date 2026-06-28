@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.2.3.7</Version>
+    <Version>1.2.3.8</Version>
   </PropertyGroup>
   <PropertyGroup>
     <DalamudLibPath>$(MSBuildThisFileDirectory)..\..\..\TC_ok\_dalamud_api12\</DalamudLibPath>
