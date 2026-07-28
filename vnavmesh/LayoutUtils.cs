@@ -43,33 +43,29 @@ struct ExdZoneSharedGroup
 	byte Unknown14;
 	byte Unknown15;
 
-    // porting-note: API12 Lumina ZoneSharedGroup fields are flat-named (no array form).
-    //   HEAD RequirementRow[i]          -> API12 Quest{i}     (RowRef<T>)
-    //   HEAD RequirementQuestSequence[i] -> API12 Seq{i}       (uint)
-    //   HEAD RequirementType[i]         -> API12 Unknown{i+2} (byte)
     public static implicit operator ExdZoneSharedGroup(Lumina.Excel.Sheets.ZoneSharedGroup sg) => new()
     {
         LGBSharedGroup = sg.LGBSharedGroup,
-        RequirementRow0 = sg.Quest0.RowId,
-        RequirementRow1 = sg.Quest1.RowId,
-        RequirementRow2 = sg.Quest2.RowId,
-        RequirementRow3 = sg.Quest3.RowId,
-        RequirementRow4 = sg.Quest4.RowId,
-        RequirementRow5 = sg.Quest5.RowId,
+        RequirementRow0 = sg.RequirementRow[0].RowId,
+        RequirementRow1 = sg.RequirementRow[1].RowId,
+        RequirementRow2 = sg.RequirementRow[2].RowId,
+        RequirementRow3 = sg.RequirementRow[3].RowId,
+        RequirementRow4 = sg.RequirementRow[4].RowId,
+        RequirementRow5 = sg.RequirementRow[5].RowId,
         Unknown0 = sg.Unknown0,
-        RequirementQuestSequence0 = sg.Seq0,
-        RequirementQuestSequence1 = sg.Seq1,
-        RequirementQuestSequence2 = sg.Seq2,
-        RequirementQuestSequence3 = sg.Seq3,
-        RequirementQuestSequence4 = sg.Seq4,
-        RequirementQuestSequence5 = sg.Seq5,
+        RequirementQuestSequence0 = sg.RequirementQuestSequence[0],
+        RequirementQuestSequence1 = sg.RequirementQuestSequence[1],
+        RequirementQuestSequence2 = sg.RequirementQuestSequence[2],
+        RequirementQuestSequence3 = sg.RequirementQuestSequence[3],
+        RequirementQuestSequence4 = sg.RequirementQuestSequence[4],
+        RequirementQuestSequence5 = sg.RequirementQuestSequence[5],
         Unknown1 = sg.Unknown1,
-        RequirementType0 = sg.Unknown2,
-        RequirementType1 = sg.Unknown3,
-        RequirementType2 = sg.Unknown4,
-        RequirementType3 = sg.Unknown5,
-        RequirementType4 = sg.Unknown6,
-        RequirementType5 = sg.Unknown7,
+        RequirementType0 = sg.RequirementType[0],
+        RequirementType1 = sg.RequirementType[1],
+        RequirementType2 = sg.RequirementType[2],
+        RequirementType3 = sg.RequirementType[3],
+        RequirementType4 = sg.RequirementType[4],
+        RequirementType5 = sg.RequirementType[5],
         Unknown8 = sg.Unknown8,
         Unknown9 = sg.Unknown9 ? (byte)1 : (byte)0,
         Unknown10 = sg.Unknown10 ? (byte)1 : (byte)0,
