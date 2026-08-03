@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision.Math;
 using Navmesh.Movement;
@@ -204,28 +204,65 @@ public sealed class NavmeshManager : IDisposable
 		return (bitmap.MinBounds, bitmap.MaxBounds);
 	}
 
+	// porting-note(TC): every early return below leaves CurrentKey empty, which makes Reload() clear
+	// the mesh and kick off NOTHING -- so pathfinding fails forever with "navmesh did not build
+	// successfully" and there is no error, and no INFO line, saying why (Log() here is Debug-level,
+	// which the default Dalamud log level drops). That cost three rounds of misdiagnosis on
+	// 2026-08-04, including blaming the consuming plugin. Report the reason once per change instead.
+	private string _lastNotReadyReason = "";
+
+	private string NotReadyKey(string reason)
+	{
+		if (_lastNotReadyReason != reason)
+		{
+			_lastNotReadyReason = reason;
+			LogInfo($"layout not ready, mesh load suppressed: {reason}");
+		}
+		return "";
+	}
+
 	// if non-empty string is returned, active layout is ready
 	private unsafe string GetCurrentKey()
 	{
 		var layout = LayoutWorld.Instance()->ActiveLayout;
-		if (layout == null || layout->InitState != 7 || layout->FestivalStatus is > 0 and < 5)
-			return ""; // layout not ready
+		if (layout == null)
+			return NotReadyKey("no active layout");
+		if (layout->InitState != 7)
+			return NotReadyKey($"InitState={layout->InitState} (want 7)");
+		if (layout->FestivalStatus is > 0 and < 5)
+			return NotReadyKey($"FestivalStatus={layout->FestivalStatus} (mid-transition)");
 
 		var filter = LayoutUtils.FindFilter(layout);
 		var filterKey = filter != null ? filter->Key : 0;
 
 		var terrRow = Service.LuminaRow<Lumina.Excel.Sheets.TerritoryType>(filter != null ? filter->TerritoryTypeId : layout->TerritoryTypeId);
 
-		// CE always has a festival layer (i hope). the non-festival layout is briefly loaded when entering the zone, which triggers a useless mesh build (which is also expensive because the zone is large)
+		// CE always has a festival layer. The non-festival layout is briefly loaded when entering the
+		// zone, and meshing it is a waste because the zone is large -- so wait for the festival.
+		//
+		// porting-note(TC): upstream inspects ONLY slot 0 (its comment says "i hope"). The active
+		// festival array is FixedSizeArray4 in the api13 FFXIVClientStructs and FixedSizeArray8 in
+		// api15, so slot 0 is not a safe stand-in for "has any festival" across generations, and an
+		// empty slot 0 wedges Cosmic Exploration permanently with no diagnostic. Scan every slot,
+		// which is what the check actually means.
 		if (terrRow?.TerritoryIntendedUse.RowId == 60)
 		{
-			var fest = layout->ActiveFestivals[0];
-			if (fest.Id == 0 && fest.Phase == 0)
-				return "";
+			var anyFestival = false;
+			foreach (var f in layout->ActiveFestivals)
+			{
+				if (f.Id != 0 || f.Phase != 0)
+				{
+					anyFestival = true;
+					break;
+				}
+			}
+			if (!anyFestival)
+				return NotReadyKey("Cosmic Exploration: no active festival layer yet");
 		}
 
 		var sgs = LayoutUtils.GetZoneSharedGroupsEnabled(filter != null ? filter->TerritoryTypeId : layout->TerritoryTypeId);
 
+		_lastNotReadyReason = "";
 		return $"{terrRow?.Bg}//{filterKey:X}//{LayoutUtils.FestivalsString(layout->ActiveFestivals)}//{string.Join('.', sgs)}";
 	}
 

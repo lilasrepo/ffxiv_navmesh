@@ -5,3 +5,13 @@
 # broken the committed baseline since 828df750 (2026-06-13); the shipped dll came from stale obj. Pin
 # the csproj so its DotRecast.Core ProjectReference survives. See FORWARD_PORT_REFERENCE.md navmesh entry.
 DotRecast/src/DotRecast.Recast/DotRecast.Recast.csproj
+
+# vnavmesh/vnavmesh.csproj is deliberately NOT pinned — the plugin tracks upstream's <Version>.
+# It was pinned for a few hours on 2026-08-04 so the TC-only Cosmic-Exploration fixes
+# (NavmeshManager.GetCurrentKey festival-slot check; NavmeshCustomization.LinkPoints skipping a
+# TC-nonexistent point instead of discarding the whole mesh) could ship as 1.2.3.12/1.2.3.13, then
+# unpinned the same day and forced back to upstream's 1.2.3.11. Neither intermediate version was
+# ever published, so nobody is on them.
+# Consequence, by design: v1.2.3.11-TC13 is re-clobbered rather than superseded, so Dalamud offers
+# no update and anyone already on it must delete and reinstall. Publishing needs
+# -AllowStaleRepublish; the Layer-1 guard firing here is correct, not a mistake to route around.

@@ -1,4 +1,4 @@
-﻿using DotRecast.Detour;
+using DotRecast.Detour;
 using DotRecast.Recast;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision.Math;
 using System;
@@ -35,11 +35,24 @@ public class NavmeshCustomization
 
 	public virtual void CustomizeMesh(Navmesh mesh, List<uint> festivalLayers) { }
 
+	// porting-note(TC game 7.20): a customization links points taken from the CURRENT international
+	// map. TC runs older content, so parts of a zone simply are not built yet and those points have
+	// no polygon under them -- InsertPointPoly then throws, and because CustomizeMesh runs at the
+	// very end of BuildNavmesh, ONE missing point discards the whole freshly-built navmesh. The zone
+	// is then permanently unpathable with only "navmesh did not build successfully" to show for it.
+	//
+	// Concretely on 2026-08-04: Z1237SinusArdorum links the far-south "SS" cosmoliner at
+	// (-76, 50.5, 750); its arrive point (-77.3, 53.2, 745.5) does not exist on TC, which took out
+	// the entire Sinus Ardorum mesh and looked, from the consuming plugin, like ICE being broken.
+	//
+	// A link that cannot be placed should cost that one link, not the map. Skip and report it.
 	protected static (long refStart, long refEnd) LinkPoints(Navmesh nmesh, Vector3 startPos, Vector3 endPos, Navmesh.AreaId areaId = Navmesh.AreaId.ClientPath)
 	{
 		var mesh = nmesh.Mesh;
-		var refstart = InsertPointPoly(mesh, startPos, areaId);
-		var refend = InsertPointPoly(mesh, endPos, areaId | Navmesh.AreaId.Endpoint);
+		if (!TryInsertPointPoly(mesh, startPos, areaId, out var refstart))
+			return (0, 0);
+		if (!TryInsertPointPoly(mesh, endPos, areaId | Navmesh.AreaId.Endpoint, out var refend))
+			return (0, 0);
 
 		nmesh.Links.Add((mesh.GetPolyCenter(refstart).RecastToSystem(), mesh.GetPolyCenter(refend).RecastToSystem()));
 
@@ -56,6 +69,25 @@ public class NavmeshCustomization
 		startTile.polyLinks[startPoly.index] = idx;
 
 		return (refstart, refend);
+	}
+
+	/// <summary>
+	/// <see cref="InsertPointPoly"/>, but a point with no polygon under it is reported and skipped
+	/// instead of aborting the whole mesh build. See the note on <see cref="LinkPoints"/>.
+	/// </summary>
+	private static bool TryInsertPointPoly(DtNavMesh mesh, Vector3 pos, Navmesh.AreaId areaId, out long polyRef)
+	{
+		try
+		{
+			polyRef = InsertPointPoly(mesh, pos, areaId);
+			return true;
+		}
+		catch (ArgumentException ex)
+		{
+			Service.Log.Warning($"[NavmeshCustomization] skipping link: {ex.Message} -- this point most likely belongs to content this client does not have");
+			polyRef = 0;
+			return false;
+		}
 	}
 
 	private static long InsertPointPoly(DtNavMesh mesh, Vector3 pos, Navmesh.AreaId areaId)
