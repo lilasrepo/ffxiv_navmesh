@@ -98,9 +98,23 @@ public unsafe static class LayoutUtils
 
     public static uint[] GetZoneSharedGroupsEnabled(uint territoryType)
     {
-        // porting-note: API12 Lumina TerritoryType lacks the ZoneSharedGroup column (HEAD/game-7.5 added).
-        // Without the lumina backing, this function is structurally inert; return empty to caller.
-        return [];
+        // porting-note(api13): restored 2026-09-02 — Lumina.Excel.Sheets.TerritoryType.ZoneSharedGroup exists in CS 6966.
+        // _getEnabledRequirementIndex's own sig is unverified on TC (separate C-tier signature, not in this restore's
+        // scope); guard against it having failed to resolve rather than crashing on a null function pointer.
+        if (_getEnabledRequirementIndex == null)
+            return [];
+        var tt = Service.LuminaRow<Lumina.Excel.Sheets.TerritoryType>(territoryType);
+        if (tt == null)
+            return [];
+
+        var rows = tt.Value.ZoneSharedGroup.Value.ToList();
+        var indices = new uint[rows.Count];
+        for (var i = 0; i < rows.Count; i++)
+        {
+            ExdZoneSharedGroup exd = rows[i];
+            indices[i] = _getEnabledRequirementIndex(&exd);
+        }
+        return indices;
     }
 
 	public static string ReadString(byte* data) => data != null ? MemoryHelper.ReadStringNullTerminated((nint)data) : "";
